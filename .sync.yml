@@ -1,0 +1,9 @@
+---
+appveyor.yml:
+  delete: true
+
+.travis.yml:
+  delete: true
+
+.gitlab-ci.yml:
+  delete: true
