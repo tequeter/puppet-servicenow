@@ -1,3 +1,5 @@
+# Installs the packages/gems required to make the server-side ServiceNow API
+# work.
 class servicenow::server_prerequisites {
 
   ensure_packages('gcc')

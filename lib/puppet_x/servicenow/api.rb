@@ -7,11 +7,8 @@ module PuppetX; end
 module PuppetX::Servicenow; end
 # rubocop:enable Style/Documentation
 
+# Thin wrapper around ServiceNow's REST API.
 class PuppetX::Servicenow::API
-  def self.uri_regexp_string()
-    '\A(https?://)([^:]+):([^@]+)@(.*)\Z'
-  end
-
   def initialize(**args)
     @rest = args[:rest_client] || RestClient
 
@@ -29,10 +26,11 @@ class PuppetX::Servicenow::API
   end
 
   def get(path)
-    response = @rest.get("#{@uri}/#{path}", {
+    response = @rest.get(
+      "#{@uri}/#{path}",
       authorization: @authorization,
-      accept: :json
-    })
+      accept: :json,
+    )
 
     JSON.parse(response)
   end
@@ -40,9 +38,9 @@ class PuppetX::Servicenow::API
   def get_cmdbi_record(clazz, sys_id)
     json = get("cmdb/instance/#{clazz}/#{sys_id}")
     result = json['result']
-    unless result and result['attributes'] and result['outbound_relations'] and result['inbound_relations']
+    unless result && result['attributes'] && result['outbound_relations'] && result['inbound_relations']
       Puppet.debug(result)
-      raise RuntimeError, "The ServiceNow API was successful, but did not contain a complete result. See the --debug log."
+      raise 'The ServiceNow API was successful, but did not contain a complete result. See the --debug log.'
     end
 
     result

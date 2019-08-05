@@ -28,9 +28,9 @@ Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
   def servicenow_cmdbi_lookup_attribute(key, options, context)
     return context.cached_value(key) if context.cache_has_key(key)
 
-    unless key =~ %r{\Aservicenow::cmdbi::}
+    unless key.start_with?('servicenow::cmdbi::')
       context.explain { "servicenow_cmdbi_lookup_attribute: not looking up #{key} in ServiceNow as it does not start with servicenow::" }
-      return context.not_found()
+      return context.not_found
     end
 
     parsed_key = key.match(%r{\Aservicenow::cmdbi::([^:]+)::by_sys_id::(\h{32})::([^:]+)\Z})
@@ -48,12 +48,10 @@ Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
       raise Puppet::DataBinding::LookupError, "servicenow_cmdbi_lookup_attribute: error looking up #{key}: #{e}"
     end
 
-    context.cache_all(attributes.transform_keys {|k| "servicenow::cmdbi::#{clazz}::by_sys_id::#{sys_id}::#{k}" })
+    context.cache_all(attributes.transform_keys { |k| "servicenow::cmdbi::#{clazz}::by_sys_id::#{sys_id}::#{k}" })
 
-    if attributes.include?(attribute)
-      return attributes[attribute]
-    else
-      return context.not_found()
-    end
+    return context.not_found unless attributes.include?(attribute)
+
+    attributes[attribute]
   end
 end
