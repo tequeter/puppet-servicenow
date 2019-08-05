@@ -11,9 +11,9 @@
 #
 # The Hiera options must contain a `uri` entry in the form
 # `https://yourcompany.service-now.com/api/now`, and under `options` a
-# `servicenow_credentials` hash with that URI as key and the path of a file
-# containing the credentials as value. The file must contain a single line in
-# the form `user:password` and should be protected by filesystem permissions.
+# `servicenow_credentials` entry with the path of a file containing the
+# credentials as value. The file must contain a single line in the form
+# `user:password` and should be protected by filesystem permissions.
 Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
   require_relative '../../puppet_x/servicenow/api'
 

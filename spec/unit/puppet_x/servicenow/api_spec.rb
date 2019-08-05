@@ -1,13 +1,9 @@
 require 'spec_helper'
 require 'puppet_x/servicenow/api'
 
-cred_fpath = File.join(RSPEC_ROOT, 'fixtures', 'files', 'credentials')
-
 lookup_options = {
   'uri'                    => 'https://example.com/api/now',
-  'servicenow_credentials' => {
-    'https://example.com/api/now' => cred_fpath,
-  },
+  'servicenow_credentials' => File.join(RSPEC_ROOT, 'fixtures', 'files', 'credentials'),
 }
 
 # Plain text: "user:password"

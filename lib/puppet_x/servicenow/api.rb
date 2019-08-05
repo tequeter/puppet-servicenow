@@ -16,8 +16,7 @@ class PuppetX::Servicenow::API
 
     @uri = lookup_options['uri']
 
-    all_creds = lookup_options['servicenow_credentials']
-    my_creds_fpath = all_creds[@uri]
+    my_creds_fpath = lookup_options['servicenow_credentials']
     my_creds_file = File.new(my_creds_fpath)
     my_creds = my_creds_file.readline.chomp
     raise "Expected a single line user:pass in #{my_creds_fpath}" unless my_creds =~ %r{\A[^:]+:}
