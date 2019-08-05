@@ -1,12 +1,19 @@
-# Exposes a servicenow::cmdbi::... namespace to lookup ServiceNow CMDB
+# Exposes a `servicenow::cmdbi::...` namespace to lookup ServiceNow CMDB
 # class instance attributes from Hiera (cmdbi as in instance, versus metadata).
 #
 # The only supported format for now is:
-# servicenow::cmdbi::<class>::by_sys_id::<sys_id>::<attribute>
+# `servicenow::cmdbi::<class>::by_sys_id::<sys_id>::<attribute>`
 #
-# with <class> the technical name (for example cmdb_ci_appl, not Applications),
-# <sys_id> the internal 32 chars GUID, and <attribute> the technical name of
-# the attribute. Most technical stuff can be figured out from ServiceNow URLs.
+# with `<class>` the technical name (for example cmdb_ci_appl, not
+# Applications), `<sys_id>` the internal 32 chars GUID, and `<attribute>` the
+# technical name of the attribute. Most technical stuff can be figured out from
+# ServiceNow URLs.
+#
+# The Hiera options must contain a `uri` entry in the form
+# `https://yourcompany.service-now.com/api/now`, and under `options` a
+# `servicenow_credentials` hash with that URI as key and the path of a file
+# containing the credentials as value. The file must contain a single line in
+# the form `user:password` and should be protected by filesystem permissions.
 Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
   require_relative '../../puppet_x/servicenow/api'
 
@@ -34,7 +41,7 @@ Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
 
     attributes = nil
     begin
-      api = PuppetX::Servicenow::API.new(options['uri'])
+      api = PuppetX::Servicenow::API.new(lookup_options: options)
       record = api.get_cmdbi_record(clazz, sys_id)
       attributes = record['attributes']
     rescue StandardError => e

@@ -7,3 +7,9 @@ appveyor.yml:
 
 .gitlab-ci.yml:
   delete: true
+
+Gemfile:
+  required:
+    ':development':
+      - gem: 'rspec-mocks'
+        version: '~> 3.8'
