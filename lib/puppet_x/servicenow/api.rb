@@ -34,10 +34,7 @@ class PuppetX::Servicenow::API
   # - config_path: where to find a YAML file with keys uri, user, and password.
   # - config: the same content as a hash. Either one of config and config_path
   #   is required.
-  # - rest_client: for unit testing, use a different REST lib than RestClient.
   def initialize(**args)
-    @rest = args[:rest_client] || RestClient
-
     @config = self.class.get_initialize_config(args)
     config_check = CONFIG_SCHEMA.validate(@config)
     raise "Error in provided configuration: #{config_check.error}" unless config_check.valid?
@@ -48,24 +45,37 @@ class PuppetX::Servicenow::API
     @authorization = "Basic #{Base64.strict_encode64(userpass)}"
   end
 
-  def get(path)
-    response = @rest.get(
-      "#{@uri}/#{path}",
+  # @api private
+  def call_snow(method, path, payload)
+    url = "#{@uri}/#{path}"
+    response = RestClient::Request.execute(
+      method: method,
+      url: url,
       authorization: @authorization,
+      payload: payload,
       accept: :json,
+      content_type: :json,
     )
+
+    Puppet.debug("#{method} to #{url} with payload\n#{payload}\nresults in\n#{response}")
 
     JSON.parse(response)
   end
 
   def get_cmdbi_record(clazz, sys_id)
-    json = get("cmdb/instance/#{clazz}/#{sys_id}")
+    json = call_snow(:get, "v1/cmdb/instance/#{clazz}/#{sys_id}", nil)
     result = json['result']
     unless result && result['attributes'] && result['outbound_relations'] && result['inbound_relations']
-      Puppet.debug(result)
       raise 'The ServiceNow API was successful, but did not contain a complete result. See the --debug log.'
     end
 
     result
+  end
+
+  # "payload" typically includes an "attributes" key, a hash with attributes to
+  # update.
+  def patch_cmdbi_record(clazz, sys_id, payload)
+    payload['source'] ||= 'ServiceNow'
+    call_snow(:patch, "v1/cmdb/instance/#{clazz}/#{sys_id}", payload)
   end
 end
