@@ -15,3 +15,5 @@ Gemfile:
         version: '~> 3.8'
       - gem: 'rest-client'
         version: '~> 2.0'
+      - gem: 'rschema'
+        version: '~> 3.0'

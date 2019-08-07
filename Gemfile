@@ -29,6 +29,7 @@ group :development do
   gem "puppet-module-win-dev-r#{minor_version}",       require: false, platforms: [:mswin, :mingw, :x64_mingw]
   gem "rspec-mocks", '~> 3.8',                         require: false
   gem "rest-client", '~> 2.0',                         require: false
+  gem "rschema", '~> 3.0',                             require: false
 end
 
 puppet_version = ENV['PUPPET_GEM_VERSION']

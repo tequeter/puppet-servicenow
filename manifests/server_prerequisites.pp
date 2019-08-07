@@ -4,7 +4,7 @@ class servicenow::server_prerequisites {
 
   ensure_packages('gcc')
 
-  [ 'json', 'rest-client' ].each |$_pkg| {
+  [ 'json', 'rest-client', 'rschema' ].each |$_pkg| {
     [ 'puppet', 'puppetserver' ].each |$_store| {
       package { "${_pkg}-${_store}-gem":
         ensure   => present,

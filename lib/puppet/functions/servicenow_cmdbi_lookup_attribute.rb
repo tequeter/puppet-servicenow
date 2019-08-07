@@ -9,11 +9,19 @@
 # technical name of the attribute. Most technical stuff can be figured out from
 # ServiceNow URLs.
 #
-# The Hiera options must contain a `uri` entry in the form
-# `https://yourcompany.service-now.com/api/now`, and under `options` a
-# `servicenow_credentials` entry with the path of a file containing the
-# credentials as value. The file must contain a single line in the form
-# `user:password` and should be protected by filesystem permissions.
+# The Hiera options must contain a path-like configuration (path, paths, glob,
+# globs, although it's unlikely you'll ever need more than "path"). That path
+# must point to a YAML file like:
+#
+# ```yaml
+# ---
+# uri: https://mycompany.service-now.com/api/now
+# user: user
+# password: password
+# ```
+#
+# The file and its password entry should be protected by filesystem
+# permissions.
 Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
   require_relative '../../puppet_x/servicenow/api'
 
@@ -41,7 +49,7 @@ Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
 
     attributes = nil
     begin
-      api = PuppetX::Servicenow::API.new(lookup_options: options)
+      api = PuppetX::Servicenow::API.new(config_path: options['path'])
       record = api.get_cmdbi_record(clazz, sys_id)
       attributes = record['attributes']
     rescue StandardError => e
