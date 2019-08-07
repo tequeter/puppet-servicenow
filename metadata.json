@@ -40,7 +40,7 @@
       "version_requirement": ">= 4.10.0 < 7.0.0"
     }
   ],
-  "pdk-version": "1.10.0",
-  "template-url": "file:///C:/apps/PDK/share/cache/pdk-templates.git#1.10.0",
+  "pdk-version": "1.11.1",
+  "template-url": "https://github.com/puppetlabs/pdk-templates.git#1.10.0",
   "template-ref": "1.10.0-0-gbba9ac3"
 }
