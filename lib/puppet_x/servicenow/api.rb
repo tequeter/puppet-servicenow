@@ -13,7 +13,7 @@ module PuppetX::Servicenow; end
 class PuppetX::Servicenow::API
   CONFIG_SCHEMA = RSchema.define_hash do
     {
-      'uri'      => pipeline(_String, predicate('http(s) uri') { |x| x.start_with?(%r{https?://}) }),
+      'url'      => pipeline(_String, predicate('http(s) url') { |x| x.start_with?(%r{https?://}) }),
       'user'     => _String,
       'password' => _String,
     }
@@ -31,7 +31,7 @@ class PuppetX::Servicenow::API
   end
 
   # Named arguments:
-  # - config_path: where to find a YAML file with keys uri, user, and password.
+  # - config_path: where to find a YAML file with keys url, user, and password.
   # - config: the same content as a hash. Either one of config and config_path
   #   is required.
   def initialize(**args)
@@ -39,7 +39,7 @@ class PuppetX::Servicenow::API
     config_check = CONFIG_SCHEMA.validate(@config)
     raise "Error in provided configuration: #{config_check.error}" unless config_check.valid?
 
-    @uri = @config['uri']
+    @url = @config['url']
 
     userpass = "#{@config['user']}:#{@config['password']}"
     @authorization = "Basic #{Base64.strict_encode64(userpass)}"
@@ -47,7 +47,7 @@ class PuppetX::Servicenow::API
 
   # @api private
   def call_snow(method, path, payload)
-    url = "#{@uri}/#{path}"
+    url = "#{@url}/#{path}"
     response = RestClient::Request.execute(
       method: method,
       url: url,

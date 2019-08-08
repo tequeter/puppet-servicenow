@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'puppet_x/servicenow/api'
 
 api_config = {
-  'uri'      => 'https://example.com/api/now',
+  'url'      => 'https://example.com/api/now',
   'user'     => 'user',
   'password' => 'password',
 }
@@ -18,20 +18,20 @@ describe PuppetX::Servicenow::API do
       expect { described_class.new }.to raise_error(ArgumentError)
     end
 
-    it 'extracts uri and credentials from :config' do
+    it 'extracts url and credentials from :config' do
       api = described_class.new(config: api_config)
-      expect(api.instance_variable_get(:@uri)).to eq('https://example.com/api/now')
+      expect(api.instance_variable_get(:@url)).to eq('https://example.com/api/now')
       expect(api.instance_variable_get(:@authorization)).to eq(authorization_header)
     end
 
-    it 'validates the uri' do
-      bad_config = api_config.merge('uri' => 'htp://example.com')
+    it 'validates the url' do
+      bad_config = api_config.merge('url' => 'htp://example.com')
       expect { described_class.new(config: bad_config) }.to raise_error(%r{\AError in provided config})
     end
 
-    it 'extracts uri and credentials from :config_path' do
+    it 'extracts url and credentials from :config_path' do
       api = described_class.new(config_path: File.join(RSPEC_ROOT, 'fixtures', 'files', 'example.com.yaml'))
-      expect(api.instance_variable_get(:@uri)).to eq('https://example.com/api/now')
+      expect(api.instance_variable_get(:@url)).to eq('https://example.com/api/now')
       expect(api.instance_variable_get(:@authorization)).to eq(authorization_header)
     end
   end

@@ -15,7 +15,7 @@
 #
 # ```yaml
 # ---
-# uri: https://mycompany.service-now.com/api/now
+# url: https://mycompany.service-now.com/api/now
 # user: user
 # password: password
 # ```
