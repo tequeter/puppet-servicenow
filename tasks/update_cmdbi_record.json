@@ -1,0 +1,25 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Set attributes on a CI or other CMDB instance record",
+  "input_method": "stdin",
+  "remote": true,
+  "parameters": {
+    "class": {
+      "description": "Class of the CI, determines the visible attributes",
+      "type": "String[1]"
+    },
+    "sys_id": {
+      "description": "Unique ID of the CI, visible in the browser's URL",
+      "type": "Servicenow::Sys_id"
+    },
+    "attributes": {
+      "description": "What to update on that CI, for example {\"version\": \"1.2.3\"}",
+      "type": "Hash[String[1], Any]"
+    }
+  },
+  "files": [
+    "ruby_task_helper/files/task_helper.rb",
+    "servicenow/lib/puppet_x/servicenow/api.rb"
+  ]
+}

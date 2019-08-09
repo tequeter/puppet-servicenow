@@ -1,3 +1,4 @@
+require 'puppet'
 require 'json'
 require 'base64'
 require 'rest-client'

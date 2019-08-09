@@ -1,21 +1,6 @@
 
 # servicenow
 
-Welcome to your new module. A short overview of the generated parts can be found in the PDK documentation at https://puppet.com/pdk/latest/pdk_generating_modules.html .
-
-The README template below provides a starting point with details about what information to include in your README.
-
-#### Table of Contents
-
-1. [Description](#description)
-2. [Setup - The basics of getting started with servicenow](#setup)
-    * [What servicenow affects](#what-servicenow-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with servicenow](#beginning-with-servicenow)
-3. [Usage - Configuration options and additional functionality](#usage)
-4. [Limitations - OS compatibility, etc.](#limitations)
-5. [Development - Guide for contributing to the module](#development)
-
 ## Description
 
 Briefly tell users why they might want to use your module. Explain what your module does and what kind of problems users can solve with it.
@@ -36,9 +21,14 @@ If there's more that they should know about, though, this is the place to mentio
 
 ### Setup Requirements **OPTIONAL**
 
-If your module requires anything extra before setting up (pluginsync enabled, another module, etc.), mention it here.
+This module requires a few gems installed.
 
-If your most recent release breaks compatibility or requires particular steps for upgrading, you might want to include an additional "Upgrading" section here.
+For the Hiera lookups, just include the `servicenow::server_prerequisites.pp` class in the profile of your Puppet server node.
+
+For the Bolt tasks, you have to:
+
+- Make sure the `puppetlabs/ruby_task_helper` is installed in your modulepath.
+- Run `/opt/puppetlabs/bolt/bin/gem install --user-install json rest-client rschema`
 
 ### Beginning with servicenow
 

@@ -1,0 +1,6 @@
+inherit_from: ../.rubocop.yml
+
+Lint/ScriptPermission:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
