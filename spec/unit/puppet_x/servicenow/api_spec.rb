@@ -12,6 +12,9 @@ authorization_header = 'Basic dXNlcjpwYXNzd29yZA=='
 
 sample_sys_id = '00000000000000000000000000000000'
 
+sample_payload_hash = { 'pay' => 'load' }
+sample_payload_stringified = '{"pay":"load"}'
+
 describe PuppetX::Servicenow::API do
   describe '#initialize' do
     it 'fails without a config* argument' do
@@ -36,29 +39,47 @@ describe PuppetX::Servicenow::API do
     end
   end
 
-  describe '#call_snow' do
-    payload = '{"pay": "load"}'
-    args = {
-      method: :sew,
-      url: 'https://example.com/foo',
-      authorization: authorization_header,
-      payload: payload,
-      accept: :json,
-      content_type: :json,
-    }
+  describe '#create_request' do
+    api = described_class.new(config: api_config)
+    request = api.create_request(:patch, 'https://example.com/path1', sample_payload_hash)
 
-    it 'calls the ServiceNow API' do
-      expect(RestClient::Request).to receive(:execute).with(args).and_return('{"key": "value"}')
-      api = described_class.new(config: api_config)
-      expect(api.call_snow(:sew, 'foo', payload)).to eq('key' => 'value')
+    it 'sets the method' do
+      expect(request.method).to eq('patch')
     end
 
-    # RestClient raises on errors, no point testing that here
+    it 'sets the URL' do
+      expect(request.url).to eq('https://example.com/path1')
+    end
+
+    it 'sets the headers correctly' do
+      expect(request.processed_headers).to include(
+        'Accept'        => 'application/json',
+        'Content-Type'  => 'application/json',
+        'Authorization' => authorization_header,
+      )
+    end
+
+    it 'stringifies the payload' do
+      expect(request.payload.to_s).to eq(sample_payload_stringified)
+    end
+  end
+
+  describe '#call_snow' do
+    let(:api) { described_class.new(config: api_config) }
+    let(:request) { instance_double('RestClient::Request') }
+
+    it 'assembles the URL' do
+      expect(api).to receive(:create_request).with(:method, 'https://example.com/path', 'payload').and_return(request)
+      expect(request).to receive(:execute).and_return('{}')
+
+      api.call_snow(:method, 'path', 'payload')
+    end
 
     it 'fails on invalid JSON result' do
-      expect(RestClient::Request).to receive(:execute).and_return('foo')
-      api = described_class.new(config: api_config)
-      expect { api.call_snow(:sew, 'foo', payload) }.to raise_error(JSON::ParserError)
+      expect(api).to receive(:create_request).and_return(request)
+      expect(request).to receive(:execute).and_return('foo')
+
+      expect { api.call_snow(:foo, 'foo', 'foo') }.to raise_error(JSON::ParserError)
     end
   end
 

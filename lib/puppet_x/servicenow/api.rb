@@ -46,16 +46,24 @@ class PuppetX::Servicenow::API
   end
 
   # @api private
-  def call_snow(method, path, payload)
-    url = "#{@url}/#{path}"
-    response = RestClient::Request.execute(
+  def create_request(method, url, payload)
+    payload = payload.to_json if payload.respond_to?(:each)
+    RestClient::Request.new(
       method: method,
       url: url,
-      authorization: @authorization,
       payload: payload,
-      accept: :json,
-      content_type: :json,
+      headers: {
+        authorization: @authorization,
+        accept: :json,
+        content_type: :json,
+      },
     )
+  end
+
+  # @api private
+  def call_snow(method, path, payload)
+    url = "#{@url}/#{path}"
+    response = create_request(method, url, payload).execute
 
     Puppet.debug("#{method} to #{url} with payload\n#{payload}\nresults in\n#{response}")
 
