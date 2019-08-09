@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'puppet_x/servicenow/api'
 
 api_config = {
-  'url'      => 'https://example.com/api/now',
+  'url'      => 'https://example.com',
   'user'     => 'user',
   'password' => 'password',
 }
@@ -20,7 +20,7 @@ describe PuppetX::Servicenow::API do
 
     it 'extracts url and credentials from :config' do
       api = described_class.new(config: api_config)
-      expect(api.instance_variable_get(:@url)).to eq('https://example.com/api/now')
+      expect(api.instance_variable_get(:@url)).to eq('https://example.com')
       expect(api.instance_variable_get(:@authorization)).to eq(authorization_header)
     end
 
@@ -31,7 +31,7 @@ describe PuppetX::Servicenow::API do
 
     it 'extracts url and credentials from :config_path' do
       api = described_class.new(config_path: File.join(RSPEC_ROOT, 'fixtures', 'files', 'example.com.yaml'))
-      expect(api.instance_variable_get(:@url)).to eq('https://example.com/api/now')
+      expect(api.instance_variable_get(:@url)).to eq('https://example.com')
       expect(api.instance_variable_get(:@authorization)).to eq(authorization_header)
     end
   end
@@ -40,7 +40,7 @@ describe PuppetX::Servicenow::API do
     payload = '{"pay": "load"}'
     args = {
       method: :sew,
-      url: 'https://example.com/api/now/foo',
+      url: 'https://example.com/foo',
       authorization: authorization_header,
       payload: payload,
       accept: :json,
@@ -63,7 +63,7 @@ describe PuppetX::Servicenow::API do
   end
 
   describe '#get_cmdbi_record' do
-    url = "v1/cmdb/instance/cmdb_ci_appl/#{sample_sys_id}"
+    url = "api/now/v1/cmdb/instance/cmdb_ci_appl/#{sample_sys_id}"
 
     it 'defers to call_snow()' do
       sample_hash = { 'attributes' => { 'key' => 'value' }, 'outbound_relations' => {}, 'inbound_relations' => {} }
@@ -87,7 +87,7 @@ describe PuppetX::Servicenow::API do
       payload_fixed = { 'attributes' => { 'key' => 'value' }, 'source' => 'ServiceNow' }
 
       api = described_class.new(config: api_config)
-      url = "v1/cmdb/instance/cmdb_ci_appl/#{sample_sys_id}"
+      url = "api/now/v1/cmdb/instance/cmdb_ci_appl/#{sample_sys_id}"
 
       expect(api).to receive(:call_snow).with(:patch, url, payload_fixed)
       api.patch_cmdbi_record('cmdb_ci_appl', sample_sys_id, payload_in)

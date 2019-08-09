@@ -63,7 +63,7 @@ class PuppetX::Servicenow::API
   end
 
   def get_cmdbi_record(clazz, sys_id)
-    json = call_snow(:get, "v1/cmdb/instance/#{clazz}/#{sys_id}", nil)
+    json = call_snow(:get, "api/now/v1/cmdb/instance/#{clazz}/#{sys_id}", nil)
     result = json['result']
     unless result && result['attributes'] && result['outbound_relations'] && result['inbound_relations']
       raise 'The ServiceNow API was successful, but did not contain a complete result. See the --debug log.'
@@ -76,6 +76,6 @@ class PuppetX::Servicenow::API
   # update.
   def patch_cmdbi_record(clazz, sys_id, payload)
     payload['source'] ||= 'ServiceNow'
-    call_snow(:patch, "v1/cmdb/instance/#{clazz}/#{sys_id}", payload)
+    call_snow(:patch, "api/now/v1/cmdb/instance/#{clazz}/#{sys_id}", payload)
   end
 end
