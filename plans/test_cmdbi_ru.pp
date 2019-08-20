@@ -1,7 +1,22 @@
 # @summary End-to-end test for CMDB Instance retrieve / update.
 #
+# This test updates the attribute of an existing CI to a new value, ensure it
+# is as expected, and rolls back the change.
+#
 # You'll need to provide a `sys_id` of an Application in your CMDB and a
 # `target_value` different from its current value.
+#
+# @param nodes
+#   Must match the ServiceNow entry in your inventory. Multiple nodes are not
+#   supported.
+# @param class
+#   Internal ServiceNow class name for the CI.
+# @param sys_id
+#   Internal ServiceNow identifier for an existing CI.
+# @param attribute
+#   CI attribute we'll test updating.
+# @param target_value
+#   The value we'll set the attribute to.
 plan servicenow::test_cmdbi_ru (
   TargetSpec $nodes,
   String[1] $class = 'cmdb_ci_appl',

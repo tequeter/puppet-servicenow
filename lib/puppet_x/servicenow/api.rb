@@ -5,13 +5,14 @@ require 'rest-client'
 require 'yaml'
 require 'rschema'
 
-# rubocop:disable Style/Documentation
+# 3rd party Puppet Ruby Extensions
 module PuppetX; end
+# Ruby helpers for the ServiceNow module
 module PuppetX::Servicenow; end
-# rubocop:enable Style/Documentation
 
 # Thin wrapper around ServiceNow's REST API.
 class PuppetX::Servicenow::API
+  # Required entries in the config_path YAML file.
   CONFIG_SCHEMA = RSchema.define_hash do
     {
       'url'      => pipeline(_String, predicate('http(s) url') { |x| x.start_with?(%r{https?://}) }),
@@ -20,6 +21,7 @@ class PuppetX::Servicenow::API
     }
   end
 
+  # Expected entries in a ServiceNow CMDBI GET response.
   CMDBI_RECORD_SCHEMA = RSchema.define_hash do
     {
       'attributes'         => variable_hash(_String => anything),
@@ -28,6 +30,7 @@ class PuppetX::Servicenow::API
     }
   end
 
+  # Abstract loading the configuration.
   # @api private
   def self.get_initialize_config(args)
     if args[:config]
@@ -54,6 +57,7 @@ class PuppetX::Servicenow::API
     @authorization = "Basic #{Base64.strict_encode64(userpass)}"
   end
 
+  # Create a RestClient::Request with the proper arguments.
   # @api private
   def create_request(method, url, payload)
     payload = payload.to_json if payload.respond_to?(:each)
@@ -69,6 +73,7 @@ class PuppetX::Servicenow::API
     )
   end
 
+  # Construct the final ServiceNow URL, call the API, and parse the JSON result.
   # @api private
   def call_snow(method, path, payload)
     url = "#{@url}/#{path}"
