@@ -79,6 +79,13 @@ class PuppetX::Servicenow::API
     JSON.parse(response)
   end
 
+  # Fetch a CI by its unique sys_id.
+  #
+  # The class (clazz) determines the returned attributes, so it must be as
+  # exact as possible.
+  #
+  # Return a hash with attributes, inbound_relations, and outbound_relations
+  # string keys.
   def get_cmdbi_record(clazz, sys_id)
     json = call_snow(:get, "api/now/v1/cmdb/instance/#{clazz}/#{sys_id}", nil)
     result = json['result']
@@ -89,6 +96,8 @@ class PuppetX::Servicenow::API
     result
   end
 
+  # Update some fields in an existing CI.
+  #
   # "payload" typically includes an "attributes" key, a hash with attributes to
   # update.
   def patch_cmdbi_record(clazz, sys_id, payload)
