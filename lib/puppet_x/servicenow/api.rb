@@ -20,6 +20,14 @@ class PuppetX::Servicenow::API
     }
   end
 
+  CMDBI_RECORD_SCHEMA = RSchema.define_hash do
+    {
+      'attributes'         => variable_hash(_String => anything),
+      'inbound_relations'  => array(anything),
+      'outbound_relations' => array(anything),
+    }
+  end
+
   # @api private
   def self.get_initialize_config(args)
     if args[:config]
@@ -74,9 +82,9 @@ class PuppetX::Servicenow::API
   def get_cmdbi_record(clazz, sys_id)
     json = call_snow(:get, "api/now/v1/cmdb/instance/#{clazz}/#{sys_id}", nil)
     result = json['result']
-    unless result && result['attributes'] && result['outbound_relations'] && result['inbound_relations']
-      raise 'The ServiceNow API was successful, but did not contain a complete result. See the --debug log.'
-    end
+
+    result_check = CMDBI_RECORD_SCHEMA.validate(result)
+    raise "Invalid result from successful ServiceNow API call: #{result_check.error}" unless result_check.valid?
 
     result
   end

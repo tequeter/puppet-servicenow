@@ -87,7 +87,7 @@ describe PuppetX::Servicenow::API do
     url = "api/now/v1/cmdb/instance/cmdb_ci_appl/#{sample_sys_id}"
 
     it 'defers to call_snow()' do
-      sample_hash = { 'attributes' => { 'key' => 'value' }, 'outbound_relations' => {}, 'inbound_relations' => {} }
+      sample_hash = { 'attributes' => { 'key' => 'value' }, 'outbound_relations' => [], 'inbound_relations' => [] }
       api = described_class.new(config: api_config)
 
       expect(api).to receive(:call_snow).with(:get, url, nil).and_return('result' => sample_hash)
@@ -98,7 +98,7 @@ describe PuppetX::Servicenow::API do
       api = described_class.new(config: api_config)
 
       expect(api).to receive(:call_snow).with(:get, url, nil).and_return('result' => {})
-      expect { api.get_cmdbi_record('cmdb_ci_appl', sample_sys_id) }.to raise_error(%r{complete result})
+      expect { api.get_cmdbi_record('cmdb_ci_appl', sample_sys_id) }.to raise_error(%r{Invalid result})
     end
   end
 
