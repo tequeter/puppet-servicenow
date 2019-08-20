@@ -72,14 +72,32 @@ describe PuppetX::Servicenow::API do
       expect(api).to receive(:create_request).with(:method, 'https://example.com/path', 'payload').and_return(request)
       expect(request).to receive(:execute).and_return('{}')
 
-      api.call_snow(:method, 'path', 'payload')
+      api.call_snow(:method, 'path', 'payload', nil)
     end
 
     it 'fails on invalid JSON result' do
       expect(api).to receive(:create_request).and_return(request)
       expect(request).to receive(:execute).and_return('foo')
 
-      expect { api.call_snow(:foo, 'foo', 'foo') }.to raise_error(JSON::ParserError)
+      expect { api.call_snow(:foo, 'foo', 'foo', nil) }.to raise_error(JSON::ParserError)
+    end
+
+    it 'fails on invalid result schema' do
+      expect(api).to receive(:create_request).and_return(request)
+      expect(request).to receive(:execute).and_return('{}')
+
+      schema = PuppetX::Servicenow::API::TABLE_RECORD_RESULT_SCHEMA
+
+      expect { api.call_snow(:foo, 'foo', 'foo', schema) }.to raise_error(%r{Invalid result})
+    end
+
+    it 'succeeds on valid result schema' do
+      expect(api).to receive(:create_request).and_return(request)
+      expect(request).to receive(:execute).and_return('{"result": {}}')
+
+      schema = PuppetX::Servicenow::API::TABLE_RECORD_RESULT_SCHEMA
+
+      expect(api.call_snow(:foo, 'foo', 'foo', schema)).to eql('result' => {})
     end
   end
 
@@ -88,17 +106,11 @@ describe PuppetX::Servicenow::API do
 
     it 'defers to call_snow()' do
       sample_hash = { 'attributes' => { 'key' => 'value' }, 'outbound_relations' => [], 'inbound_relations' => [] }
+      schema = PuppetX::Servicenow::API::CMDBI_RECORD_RESULT_SCHEMA
       api = described_class.new(config: api_config)
 
-      expect(api).to receive(:call_snow).with(:get, url, nil).and_return('result' => sample_hash)
-      expect(api.get_cmdbi_record('cmdb_ci_appl', sample_sys_id)).to eq(sample_hash)
-    end
-
-    it 'checks the result structure' do
-      api = described_class.new(config: api_config)
-
-      expect(api).to receive(:call_snow).with(:get, url, nil).and_return('result' => {})
-      expect { api.get_cmdbi_record('cmdb_ci_appl', sample_sys_id) }.to raise_error(%r{Invalid result})
+      expect(api).to receive(:call_snow).with(:get, url, nil, schema).and_return('result' => sample_hash)
+      expect(api.get_cmdbi_record('cmdb_ci_appl', sample_sys_id)).to eql(sample_hash)
     end
   end
 
@@ -110,8 +122,21 @@ describe PuppetX::Servicenow::API do
       api = described_class.new(config: api_config)
       url = "api/now/v1/cmdb/instance/cmdb_ci_appl/#{sample_sys_id}"
 
-      expect(api).to receive(:call_snow).with(:patch, url, payload_fixed)
+      expect(api).to receive(:call_snow).with(:patch, url, payload_fixed, nil)
       api.patch_cmdbi_record('cmdb_ci_appl', sample_sys_id, payload_in)
+    end
+  end
+
+  describe '#get_table_record' do
+    url = "api/now/v2/table/change_request/#{sample_sys_id}"
+
+    it 'defers to call_snow()' do
+      sample_hash = { 'description' => 'foo' }
+      schema = PuppetX::Servicenow::API::TABLE_RECORD_RESULT_SCHEMA
+      api = described_class.new(config: api_config)
+
+      expect(api).to receive(:call_snow).with(:get, url, nil, schema).and_return('result' => sample_hash)
+      expect(api.get_table_record('change_request', sample_sys_id)).to eql(sample_hash)
     end
   end
 end

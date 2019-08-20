@@ -1,0 +1,25 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Set attributes on a Table record (most ServiceNow objects)",
+  "input_method": "stdin",
+  "remote": true,
+  "parameters": {
+    "table": {
+      "description": "Internal table name, for example change_request",
+      "type": "String[1]"
+    },
+    "sys_id": {
+      "description": "Unique ID of the record, visible in the browser's URL",
+      "type": "Servicenow::Sys_id"
+    },
+    "attributes": {
+      "description": "What to update on that record, for example {\"work_notes\": \"I did stuff\"}",
+      "type": "Hash[String[1], Any]"
+    }
+  },
+  "files": [
+    "ruby_task_helper/files/task_helper.rb",
+    "servicenow/lib/puppet_x/servicenow/api.rb"
+  ]
+}
