@@ -1,0 +1,21 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Create a new Table record (most ServiceNow objects), returns its attributes",
+  "input_method": "stdin",
+  "remote": true,
+  "parameters": {
+    "table": {
+      "description": "Internal table name, for example incident",
+      "type": "String[1]"
+    },
+    "attributes": {
+      "description": "Initial attributes (field values) the Record should have.",
+      "type": "Hash[String[1], Any]"
+    }
+  },
+  "files": [
+    "ruby_task_helper/files/task_helper.rb",
+    "servicenow/lib/puppet_x/servicenow/api.rb"
+  ]
+}

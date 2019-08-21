@@ -12,10 +12,16 @@ module PuppetX::Servicenow; end
 
 # Thin wrapper around ServiceNow's REST API.
 class PuppetX::Servicenow::API
+  # Hash with string keys
+  STRING_HASH_SCHEMA = RSchema.define { variable_hash(_String => anything) }
+
+  # An HTTP(S) URL
+  HTTP_S_URL_SCHEMA = RSchema.define { predicate('http(s) url') { |x| x.start_with?(%r{https?://}) } }
+
   # Required entries in the config_path YAML file.
   CONFIG_SCHEMA = RSchema.define_hash do
     {
-      'url'      => pipeline(_String, predicate('http(s) url') { |x| x.start_with?(%r{https?://}) }),
+      'url'      => pipeline(_String, HTTP_S_URL_SCHEMA),
       'user'     => _String,
       'password' => _String,
     }
@@ -25,17 +31,20 @@ class PuppetX::Servicenow::API
   CMDBI_RECORD_RESULT_SCHEMA = RSchema.define_hash do
     {
       'result' => fixed_hash(
-        'attributes'         => variable_hash(_String => anything),
+        'attributes'         => STRING_HASH_SCHEMA,
         'inbound_relations'  => array(anything),
         'outbound_relations' => array(anything),
       ),
     }
   end
 
-  # Expected entries in a ServiceNow Table GET response.
+  # Expected entries in a ServiceNow Table response.
   TABLE_RECORD_RESULT_SCHEMA = RSchema.define_hash do
     {
-      'result' => variable_hash(_String => anything),
+      'result' => pipeline(
+        STRING_HASH_SCHEMA,
+        predicate('has sys_id attribute') { |x| x.key?('sys_id') },
+      ),
     }
   end
 
@@ -82,26 +91,29 @@ class PuppetX::Servicenow::API
     )
   end
 
-  # Raise an exception if payload doesn't match schema. Does nothing if schema
-  # is nil.
+  # Wrapper around create_request() for easier unit testing
   # @api private
-  def maybe_validate_response_payload(payload, schema)
-    return unless schema
+  def execute_request(*args)
+    create_request(*args).execute
+  end
 
+  # Raise an exception if payload doesn't match schema.
+  # @api private
+  def validate_response_payload(payload, schema)
     check = schema.validate(payload)
-    raise "Invalid result from successful ServiceNow API call: #{check.error}" unless check.valid?
+    raise "Invalid result from successful ServiceNow API call: #{check.error.inspect}" unless check.valid?
   end
 
   # Construct the final ServiceNow URL, call the API, parse, and validate the JSON result.
   # @api private
   def call_snow(method, path, payload, schema)
     url = "#{@url}/#{path}"
-    response = create_request(method, url, payload).execute
 
+    response = execute_request(method, url, payload)
     Puppet.debug("#{method} to #{url} with payload\n#{payload}\nresults in\n#{response}")
 
-    response_payload = JSON.parse(response)
-    maybe_validate_response_payload(response_payload, schema)
+    response_payload = JSON.parse(response.body)
+    validate_response_payload(response_payload, schema)
 
     response_payload
   end
@@ -123,7 +135,8 @@ class PuppetX::Servicenow::API
   # update.
   def patch_cmdbi_record(clazz, sys_id, payload)
     payload['source'] ||= 'ServiceNow'
-    call_snow(:patch, "api/now/v1/cmdb/instance/#{clazz}/#{sys_id}", payload, nil)
+    call_snow(:patch, "api/now/v1/cmdb/instance/#{clazz}/#{sys_id}", payload, STRING_HASH_SCHEMA)
+    nil
   end
 
   # Retrieve a Table record (most ServiceNow objects) by its unique sys_id.
@@ -133,11 +146,19 @@ class PuppetX::Servicenow::API
     call_snow(:get, "api/now/v2/table/#{table}/#{sys_id}", nil, TABLE_RECORD_RESULT_SCHEMA)['result']
   end
 
-  # Update some fields in an existing table record
+  # Update some fields in an existing table record.
   #
   # @example
   #   api.patch_table_record('change_request', 'deadbeefwhatever', {'work_notes' => 'I did stuff'})
   def patch_table_record(table, sys_id, payload)
-    call_snow(:patch, "api/now/v2/table/#{table}/#{sys_id}", payload, nil)
+    call_snow(:patch, "api/now/v2/table/#{table}/#{sys_id}", payload, STRING_HASH_SCHEMA)
+    nil
+  end
+
+  # Create a new Table record
+  #
+  # Return a hash with the attributes of the new record.
+  def post_table_record(table, payload)
+    call_snow(:post, "api/now/v2/table/#{table}", payload, TABLE_RECORD_RESULT_SCHEMA)['result']
   end
 end

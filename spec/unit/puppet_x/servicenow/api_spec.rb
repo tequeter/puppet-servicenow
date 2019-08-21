@@ -1,6 +1,8 @@
 require 'spec_helper'
 require 'puppet_x/servicenow/api'
 
+PXSNA = PuppetX::Servicenow::API
+
 api_config = {
   'url'      => 'https://example.com',
   'user'     => 'user',
@@ -66,38 +68,38 @@ describe PuppetX::Servicenow::API do
 
   describe '#call_snow' do
     let(:api) { described_class.new(config: api_config) }
-    let(:request) { instance_double('RestClient::Request') }
+    let(:response) { instance_double('RestClient::Response') }
 
     it 'assembles the URL' do
-      expect(api).to receive(:create_request).with(:method, 'https://example.com/path', 'payload').and_return(request)
-      expect(request).to receive(:execute).and_return('{}')
+      expect(api).to receive(:execute_request).with(:method, 'https://example.com/path', 'payload').and_return(response)
+      expect(response).to receive(:body).and_return('{}')
 
-      api.call_snow(:method, 'path', 'payload', nil)
+      api.call_snow(:method, 'path', 'payload', PXSNA::STRING_HASH_SCHEMA)
     end
 
     it 'fails on invalid JSON result' do
-      expect(api).to receive(:create_request).and_return(request)
-      expect(request).to receive(:execute).and_return('foo')
+      expect(api).to receive(:execute_request).and_return(response)
+      expect(response).to receive(:body).and_return('foo')
 
-      expect { api.call_snow(:foo, 'foo', 'foo', nil) }.to raise_error(JSON::ParserError)
+      expect { api.call_snow(:foo, 'foo', 'foo', PXSNA::STRING_HASH_SCHEMA) }.to raise_error(JSON::ParserError)
     end
 
     it 'fails on invalid result schema' do
-      expect(api).to receive(:create_request).and_return(request)
-      expect(request).to receive(:execute).and_return('{}')
+      expect(api).to receive(:execute_request).and_return(response)
+      expect(response).to receive(:body).and_return('{}')
 
-      schema = PuppetX::Servicenow::API::TABLE_RECORD_RESULT_SCHEMA
+      schema = PXSNA::TABLE_RECORD_RESULT_SCHEMA
 
       expect { api.call_snow(:foo, 'foo', 'foo', schema) }.to raise_error(%r{Invalid result})
     end
 
     it 'succeeds on valid result schema' do
-      expect(api).to receive(:create_request).and_return(request)
-      expect(request).to receive(:execute).and_return('{"result": {}}')
+      expect(api).to receive(:execute_request).and_return(response)
+      expect(response).to receive(:body).and_return(%({"result": {"sys_id": "#{sample_sys_id}"}}))
 
-      schema = PuppetX::Servicenow::API::TABLE_RECORD_RESULT_SCHEMA
+      schema = PXSNA::TABLE_RECORD_RESULT_SCHEMA
 
-      expect(api.call_snow(:foo, 'foo', 'foo', schema)).to eql('result' => {})
+      expect(api.call_snow(:foo, 'foo', 'foo', schema)).to eql('result' => { 'sys_id' => sample_sys_id })
     end
   end
 
@@ -122,7 +124,7 @@ describe PuppetX::Servicenow::API do
       api = described_class.new(config: api_config)
       url = "api/now/v1/cmdb/instance/cmdb_ci_appl/#{sample_sys_id}"
 
-      expect(api).to receive(:call_snow).with(:patch, url, payload_fixed, nil)
+      expect(api).to receive(:call_snow).with(:patch, url, payload_fixed, PXSNA::STRING_HASH_SCHEMA)
       api.patch_cmdbi_record('cmdb_ci_appl', sample_sys_id, payload_in)
     end
   end
