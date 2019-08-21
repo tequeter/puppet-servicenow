@@ -9,32 +9,10 @@
 # technical name of the attribute. Most technical stuff can be figured out from
 # ServiceNow URLs.
 #
-# The Hiera entry looks like:
-#
-# ```yaml
-# # ...
-# hierarchy:
-#   - name: "ServiceNow CMDB"
-#     uri: "https://mycompany.service-now.com
-#     lookup_key: servicenow_cmdbi_lookup_attribute
-#     options:
-#       path: /etc/servicenow_credentials.yaml
-# # - ...
-# ```
-#
 # The Hiera options must contain a path-like configuration (path, paths, glob,
 # globs, although it's unlikely you'll ever need more than "path"). That path
-# must point to a YAML file like:
-#
-# ```yaml
-# ---
-# url: https://mycompany.service-now.com
-# user: user
-# password: password
-# ```
-#
-# The file and its password entry should be protected by filesystem
-# permissions.
+# must point to YAML-formatted credentials file. See the README for more
+# information.
 Puppet::Functions.create_function(:servicenow_cmdbi_lookup_attribute) do
   require_relative '../../puppet_x/servicenow/api'
 
