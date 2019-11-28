@@ -1,0 +1,21 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Get a Table record (most ServiceNow objects) and return the hash of attributes",
+  "input_method": "stdin",
+  "remote": true,
+  "parameters": {
+    "table": {
+      "description": "Internal table name, for example change_request",
+      "type": "String[1]"
+    },
+    "sys_id": {
+      "description": "Unique ID of the record, visible in the browser's URL",
+      "type": "Servicenow::Sys_id"
+    }
+  },
+  "files": [
+    "ruby_task_helper/files/task_helper.rb",
+    "servicenow/lib/puppet_x/servicenow/api.rb"
+  ]
+}

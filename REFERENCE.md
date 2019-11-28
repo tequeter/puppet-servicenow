@@ -19,7 +19,9 @@
 
 * [`create_table_record`](#create_table_record): Create a new Table record (most ServiceNow objects), returns its attributes
 * [`get_cmdbi_attribute`](#get_cmdbi_attribute): Get a single attribute from a CI or other CMDB instance record and return it in the "value" key. Not cached.
+* [`get_cmdbi_record`](#get_cmdbi_record): Get a CI or other CMDB instance record and return it in the "attributes" and *relations key. Not cached.
 * [`get_table_attribute`](#get_table_attribute): Get a single attribute from a Table record (most ServiceNow objects)
+* [`get_table_record`](#get_table_record): Get a Table record (most ServiceNow objects) and return the hash of attributes
 * [`update_cmdbi_record`](#update_cmdbi_record): Set attributes on a CI or other CMDB instance record
 * [`update_table_record`](#update_table_record): Set attributes on a Table record (most ServiceNow objects)
 
@@ -151,6 +153,26 @@ Data type: `String[1]`
 
 Which attribute to return, for example version
 
+### get_cmdbi_record
+
+Get a CI or other CMDB instance record and return it in the "attributes" and *relations key. Not cached.
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `class`
+
+Data type: `String[1]`
+
+Class of the CI, determines the visible attributes
+
+##### `sys_id`
+
+Data type: `Servicenow::Sys_id`
+
+Unique ID of the CI, visible in the browser's URL
+
 ### get_table_attribute
 
 Get a single attribute from a Table record (most ServiceNow objects)
@@ -176,6 +198,26 @@ Unique ID of the record, visible in the browser's URL
 Data type: `String[1]`
 
 Which field to return, for example description
+
+### get_table_record
+
+Get a Table record (most ServiceNow objects) and return the hash of attributes
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `table`
+
+Data type: `String[1]`
+
+Internal table name, for example change_request
+
+##### `sys_id`
+
+Data type: `Servicenow::Sys_id`
+
+Unique ID of the record, visible in the browser's URL
 
 ### update_cmdbi_record
 

@@ -1,0 +1,21 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Get a CI or other CMDB instance record and return it in the \"attributes\" and *relations key. Not cached.",
+  "input_method": "stdin",
+  "remote": true,
+  "parameters": {
+    "class": {
+      "description": "Class of the CI, determines the visible attributes",
+      "type": "String[1]"
+    },
+    "sys_id": {
+      "description": "Unique ID of the CI, visible in the browser's URL",
+      "type": "Servicenow::Sys_id"
+    }
+  },
+  "files": [
+    "ruby_task_helper/files/task_helper.rb",
+    "servicenow/lib/puppet_x/servicenow/api.rb"
+  ]
+}
