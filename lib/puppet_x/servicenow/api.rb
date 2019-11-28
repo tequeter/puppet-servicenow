@@ -88,13 +88,34 @@ class PuppetX::Servicenow::API
         accept: :json,
         content_type: :json,
       },
+      # SNow is usually very fast to accept requests, this should be more than
+      # enough.
+      open_timeout: 10,
+      # Some badly constructed requests and/or badly configured SNow instances
+      # can be slow.
+      read_timeout: 300,
     )
   end
 
-  # Wrapper around create_request() for easier unit testing
+  # Wrapper around create_request(), implements exponential backoff and eases
+  # unit testing.
   # @api private
   def execute_request(*args)
-    create_request(*args).execute
+    try = 0
+    begin
+      return create_request(*args).execute
+    rescue RestClient::Exception => e
+      raise unless e.is_a?(RestClient::ServerBrokeConnection) ||
+                   e.is_a?(RestClient::RequestTimeout) ||
+                   (e.is_a?(RestClient::RequestFailed) && e.http_code >= 500)
+
+      # Do not retry for too long, Puppet is waiting.
+      raise if try > 2
+
+      sleep(2**try)
+      try += 1
+      retry
+    end
   end
 
   # Raise an exception if payload doesn't match schema.

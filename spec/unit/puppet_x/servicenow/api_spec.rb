@@ -66,6 +66,28 @@ describe PuppetX::Servicenow::API do
     end
   end
 
+  describe '#execute_request' do
+    let(:api) { described_class.new(config: api_config) }
+
+    it 'does not retry client errors' do
+      expect(api).to receive(:create_request).and_raise(RestClient::RequestFailed.new(nil, 404))
+      expect(api).not_to receive(:sleep)
+      expect { api.execute_request(:method, 'path', 'payload') }.to raise_error(RestClient::RequestFailed)
+    end
+
+    it 'retries network errors' do
+      expect(api).to receive(:create_request).and_raise(RestClient::RequestTimeout)
+      expect(api).to receive(:sleep).with(1)
+      expect(api).to receive(:create_request).and_raise(RestClient::RequestTimeout)
+      expect(api).to receive(:sleep).with(2)
+      expect(api).to receive(:create_request).and_raise(RestClient::RequestTimeout)
+      expect(api).to receive(:sleep).with(4)
+      expect(api).to receive(:create_request).and_raise(RestClient::RequestTimeout)
+
+      expect { api.execute_request(:method, 'path', 'payload') }.to raise_error(RestClient::RequestTimeout)
+    end
+  end
+
   describe '#call_snow' do
     let(:api) { described_class.new(config: api_config) }
     let(:response) { instance_double('RestClient::Response') }
