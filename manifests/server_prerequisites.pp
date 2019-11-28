@@ -2,7 +2,7 @@
 # work.
 class servicenow::server_prerequisites {
 
-  ensure_packages('gcc')
+  ensure_packages('gcc-c++')
 
   [ 'rest-client', 'rschema' ].each |$_pkg| {
     [ 'puppet', 'puppetserver' ].each |$_store| {
@@ -10,7 +10,7 @@ class servicenow::server_prerequisites {
         ensure   => present,
         name     => $_pkg,
         provider => "${_store}_gem",
-        require  => Package['gcc'],
+        require  => Package['gcc-c++'],
       }
     }
   }
